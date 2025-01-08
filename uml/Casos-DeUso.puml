@@ -1,0 +1,44 @@
+@startuml
+left to right direction
+
+actor UsuarioRemitente as remitente
+actor UsuarioDestinatario as destinatario
+
+usecase "Enviar mensaje privado" as UC1
+usecase "Recibir mensaje privado" as UC2
+usecase "Cifrar mensaje antes de enviarlo" as UC3
+usecase "Descifrar mensaje al recibirlo" as UC4
+usecase "Iniciar sesión" as UC5
+usecase "Crear sala privada entre 2 usuarios" as UC6
+usecase "Validar que la sala sea exclusiva de 2 personas" as UC7
+usecase "Visualizar historial de mensajes privados" as UC8
+
+package "Gestión de Chat Privado" {
+    UC1 --> UC3 : "Usa cifrado"
+    UC2 --> UC4 : "Usa descifrado"
+    UC6 --> UC7 : "Valida exclusividad"
+    UC8 <-- UC1 : "Actualiza historial"
+}
+
+remitente --> UC1 : "Envía mensaje"
+destinatario --> UC2 : "Recibe mensaje"
+remitente --> UC5 : "Se autentica"
+destinatario --> UC5 : "Se autentica"
+remitente --> UC6 : "Crea sala privada"
+destinatario --> UC6 : "Acepta invitación"
+remitente --> UC8 : "Consulta historial"
+destinatario --> UC8 : "Consulta historial"
+
+@enduml
+
+
+u --> UC1 : "Envía"
+u --> UC2 : "Recibe"
+u --> UC5 : "Autenticación"
+u --> UC6 : "Crea sala privada"
+u --> UC8 : "Consulta historial"
+
+a --> UC9 : "Elimina"
+a --> UC5 : "Autenticación"
+
+@enduml

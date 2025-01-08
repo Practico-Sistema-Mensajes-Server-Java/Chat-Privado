@@ -1,0 +1,23 @@
+@startuml
+actor UsuarioRemitente as remitente
+actor UsuarioDestinatario as destinatario
+participant ServicioMensajePrivado as servicio
+participant SalaChatPrivado as sala
+participant UtilidadCifrado as cifrado
+participant RepositorioMensajePrivado as repositorio
+
+remitente -> servicio : enviarMensaje(remitenteId, destinatarioId, contenido)
+servicio -> cifrado : cifrar(contenido, clave)
+cifrado --> servicio : contenidoCifrado
+servicio -> sala : agregarMensaje(new MensajePrivado)
+sala -> repositorio : guardar(MensajePrivado)
+repositorio --> sala : confirmación de guardado
+servicio --> remitente : Mensaje enviado exitosamente
+
+destinatario -> servicio : listarMensajesEntreUsuarios(remitenteId, destinatarioId)
+servicio -> repositorio : obtenerMensajesEntreUsuarios(remitenteId, destinatarioId)
+repositorio --> servicio : List<MensajePrivado>
+servicio -> cifrado : descifrar(contenidoCifrado, clave)
+cifrado --> servicio : contenidoPlano
+servicio --> destinatario : List<MensajesDescifrados>
+@enduml

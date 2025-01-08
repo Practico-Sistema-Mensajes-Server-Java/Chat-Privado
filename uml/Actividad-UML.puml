@@ -1,0 +1,39 @@
+@startuml
+start
+:Usuario remitente inicia el proceso de enviar mensaje;
+:Servicio recibe remitenteId, destinatarioId y contenido;
+if (Sala privada existe?) then (Sí)
+    :Validar que la sala tiene 2 usuarios;
+    :Cifrar contenido del mensaje con clave;
+    :Crear objeto MensajePrivado;
+    :Guardar mensaje en repositorio;
+    :Notificar al destinatario;
+else (No)
+    :Mostrar error: Sala no existe;
+endif
+
+:Usuario destinatario solicita mensajes;
+:Servicio consulta mensajes en el repositorio;
+if (Existen mensajes?) then (Sí)
+    :Descifrar cada mensaje con clave;
+    :Enviar mensajes descifrados al destinatario;
+else (No)
+    :Mostrar mensaje de error: No hay mensajes;
+endif
+stop
+@enduml
+
+
+if (do redirect?) then (yes)
+  :redirect process;
+else
+  if (do forward?) then (yes)
+    :Forward request;
+  else (no)
+    :Render page template;
+  endif
+endif
+
+stop
+
+@enduml

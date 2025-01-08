@@ -1,0 +1,73 @@
+@startuml
+
+skinparam shadowing false
+skinparam dpi 150
+skinparam linetype ortho
+skinparam packageStyle square
+skinparam wrapWidth 200
+
+package "Esquema de clases" {
+    ' Clase principal que representa un mensaje en el chat privado
+    class MensajePrivado {
+        + String id
+        + String remitenteId
+        + String destinatarioId
+        + String contenidoCifrado
+        + LocalDateTime fechaHora
+        + String cifrarMensaje(String contenido, String clave)
+        + String descifrarMensaje(String contenidoCifrado, String clave)
+    }
+
+    ' Clase para representar un usuario
+    class Usuario {
+        + String id
+        + String nombre
+        + List <String> SalaChatPrivado
+        + String rol
+    }
+
+    ' Clase para credenciales de autenticación
+    class Credenciales {
+        + String idUsuario
+        + String email
+        + String password
+    }
+
+    ' Clase para representar una sala de chat privado
+    class SalaChatPrivado {
+        + String id
+        + List<String> usuarios
+        + List<MensajePrivado> mensajes
+        + SalaChatPrivado(String usuario1, String usuario2)
+        + void agregarMensaje(MensajePrivado mensaje)
+        - validarTamanioSala()
+    }
+
+    ' Interfaz para la lógica de repositorio de mensajes privados
+    interface RepositorioMensajePrivado {
+        + Flux<MensajePrivado> obtenerMensajesEntreUsuarios(String remitenteId, String destinatarioId)
+        + Mono<MensajePrivado> guardar(MensajePrivado mensaje)
+    }
+
+    ' Servicio de manejo de mensajes privados
+    class ServicioMensajePrivado {
+        + Flux<MensajePrivado> listarMensajesEntreUsuarios(String remitenteId, String destinatarioId)
+        + Mono<MensajePrivado> enviarMensaje(String remitenteId, String destinatarioId, String contenido)
+    }
+
+    ' Clase de utilidad para el cifrado
+    class UtilidadCifrado {
+        + String cifrar(String textoPlano, String clave)
+        + String descifrar(String textoCifrado, String clave)
+    }
+
+    ' Relaciones
+    SalaChatPrivado --> MensajePrivado : "Contiene mensajes"
+    SalaChatPrivado --> Usuario : "Tiene 2 usuarios"
+    ServicioMensajePrivado --> RepositorioMensajePrivado : "Usa"
+    ServicioMensajePrivado --> MensajePrivado : "Gestiona mensajes"
+    ServicioMensajePrivado --> UtilidadCifrado : "Cifra/Descifra mensajes"
+}
+
+@enduml
+

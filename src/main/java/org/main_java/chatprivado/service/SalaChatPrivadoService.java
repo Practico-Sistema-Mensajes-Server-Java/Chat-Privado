@@ -22,7 +22,7 @@ public class SalaChatPrivadoService {
     private UsuarioRepository usuarioRepository;
 
     @Transactional
-    public SalaChatPrivado create (SalaChatPrivadoDTO salaChatPrivadoDTO, Long idUsuario, Long id_receptor) {
+    public SalaChatPrivadoDTO create (SalaChatPrivadoDTO salaChatPrivadoDTO, Long idUsuario, Long id_receptor) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
@@ -39,7 +39,7 @@ public class SalaChatPrivadoService {
         usuario.getSalas().add(salaChatPrivado);
         receptor.getSalas().add(salaChatPrivado);
 
-        return salaChatPrivadoRepository.save(salaChatPrivado);
+        return mapToDTO(salaChatPrivadoRepository.save(salaChatPrivado));
     }
 
     @Transactional

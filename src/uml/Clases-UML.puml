@@ -45,14 +45,14 @@ package "Esquema de clases" {
 
     ' Interfaz para la lógica de repositorio de mensajes privados
     interface RepositorioMensajePrivado {
-        + Flux<MensajePrivado> obtenerMensajesEntreUsuarios(String remitenteId, String destinatarioId)
-        + Mono<MensajePrivado> guardar(MensajePrivado mensaje)
+        + List<MensajePrivado> obtenerMensajesEntreUsuarios(String remitenteId, String destinatarioId)
+        + MensajePrivado guardar(MensajePrivado mensaje)
     }
 
     ' Servicio de manejo de mensajes privados
     class ServicioMensajePrivado {
-        + Flux<MensajePrivado> listarMensajesEntreUsuarios(String remitenteId, String destinatarioId)
-        + Mono<MensajePrivado> enviarMensaje(String remitenteId, String destinatarioId, String contenido)
+        + List<MensajePrivado> listarMensajesEntreUsuarios(String remitenteId, String destinatarioId)
+        + MensajePrivado enviarMensaje(String remitenteId, String destinatarioId, String contenido)
     }
 
     ' Clase de utilidad para el cifrado
@@ -70,4 +70,3 @@ package "Esquema de clases" {
 }
 
 @enduml
-

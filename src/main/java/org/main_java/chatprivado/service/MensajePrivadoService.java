@@ -1,12 +1,10 @@
 package org.main_java.chatprivado.service;
 
 import jakarta.transaction.Transactional;
-import org.main_java.chatprivado.config.RabbitMQConfig;
 import org.main_java.chatprivado.domain.MensajePrivado;
 import org.main_java.chatprivado.domain.SalaChatPrivado;
 import org.main_java.chatprivado.domain.Usuario;
 import org.main_java.chatprivado.model.MensajePrivadoDTO;
-import org.main_java.chatprivado.rabbitMQ.RabbitMQProducer;
 import org.main_java.chatprivado.repos.MensajePrivadoRepository;
 import org.main_java.chatprivado.repos.SalaChatPrivadoRepository;
 import org.main_java.chatprivado.repos.UsuarioRepository;
@@ -29,8 +27,6 @@ public class MensajePrivadoService {
     private UtilCifradoService utilCifradoService;
 
     private final SalaChatPrivadoRepository salaChatPrivadoRepository;
-    @Autowired
-    private RabbitMQProducer rabbitMQProducer;
 
     public MensajePrivadoService(@Lazy SalaChatPrivadoRepository salaChatPrivadoRepository) {
         this.salaChatPrivadoRepository = salaChatPrivadoRepository;
@@ -48,8 +44,8 @@ public class MensajePrivadoService {
         }
 
         for (int i = 0; i < salaChatPrivado.getMensajesPrivados().size(); i++) {
-            salaChatPrivado.getMensajesPrivados().get(i).setContendoCifrado(
-                    utilCifradoService.descifrarMensaje(salaChatPrivado.getMensajesPrivados().get(i).getContendoCifrado(), salaChatPrivado.getClave()));
+            salaChatPrivado.getMensajesPrivados().get(i).setContenidoCifrado(
+                    utilCifradoService.descifrarMensaje(salaChatPrivado.getMensajesPrivados().get(i).getContenidoCifrado(), salaChatPrivado.getClave()));
         }
 
         return salaChatPrivado.getMensajesPrivados();
@@ -89,23 +85,13 @@ public class MensajePrivadoService {
         salaChatPrivadoRepository.findById(mensajePrivadoDTO.getSalaChatPrivado().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Sala no encontrada"));
 
-        if (usuario.getSalas() ==  null || !usuario.getSalas().contains(mensajePrivadoDTO.getSalaChatPrivado())) {
+        if (usuario.getSalas() == null || !usuario.getSalas().contains(mensajePrivadoDTO.getSalaChatPrivado())) {
             throw new IllegalArgumentException("El usuario no pertenece a la sala");
         }
 
         String mensajeCifrado = utilCifradoService.cifrarMensaje(mensajePrivadoDTO.getContendoCifrado(), mensajePrivadoDTO.getSalaChatPrivado().getClave());
         mensajePrivadoDTO.setContendoCifrado(mensajeCifrado);
-        usuarioRepository.getReferenceById(id_usuario).getMensajes().add(mapToEntity(mensajePrivadoDTO));
-        salaChatPrivadoRepository.getReferenceById(mensajePrivadoDTO.getSalaChatPrivado().getId()).getMensajesPrivados().add(mapToEntity(mensajePrivadoDTO));
         mensajePrivadoRepository.save(mapToEntity(mensajePrivadoDTO));
-
-        MensajePrivado mensajePrivado = mapToEntity(mensajePrivadoDTO);
-
-        rabbitMQProducer.enviarMensaje(
-                RabbitMQConfig.NOMBRE_INTERCAMBIO,
-                RabbitMQConfig.CLAVE_ENRUTAMIENTO,
-                "Mensaje privado creado: [ " + "ID: " + mensajePrivado.getId() + "Mensaje: " + utilCifradoService.descifrarMensaje(mensajePrivado.getContendoCifrado(), mensajePrivado.getSalaChatPrivado().getClave()) + " ]"
-        );
     }
 
     @Transactional
@@ -114,26 +100,18 @@ public class MensajePrivadoService {
             throw new IllegalArgumentException("El mensaje debe tener un id");
         }
 
-        MensajePrivado mensajePrivado = mensajePrivadoRepository.findById(id)
+        mensajePrivadoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Mensaje no encontrado"));
 
-        mensajePrivado.getUsuario().getMensajes().remove(mensajePrivado);
-        mensajePrivado.getSalaChatPrivado().getMensajesPrivados().remove(mensajePrivado);
 
         mensajePrivadoRepository.deleteById(id);
-
-        rabbitMQProducer.enviarMensaje(
-                RabbitMQConfig.NOMBRE_INTERCAMBIO,
-                RabbitMQConfig.CLAVE_ENRUTAMIENTO,
-                "Mensaje privado eliminado: [ " + "ID: " + mensajePrivado.getId() + " ]"
-        );
     }
 
     private MensajePrivado mapToEntity(MensajePrivadoDTO mensajePrivadoDTO) {
         MensajePrivado mensajePrivado = new MensajePrivado();
 
         mensajePrivado.setId(mensajePrivadoDTO.getId());
-        mensajePrivado.setContendoCifrado(mensajePrivadoDTO.getContendoCifrado());
+        mensajePrivado.setContenidoCifrado(mensajePrivadoDTO.getContendoCifrado());
         mensajePrivado.setFecha(mensajePrivadoDTO.getFecha());
         mensajePrivado.setUsuario(mensajePrivadoDTO.getUsuario());
         mensajePrivado.setSalaChatPrivado(mensajePrivadoDTO.getSalaChatPrivado());
@@ -144,7 +122,7 @@ public class MensajePrivadoService {
         MensajePrivadoDTO mensajePrivadoDTO = new MensajePrivadoDTO();
 
         mensajePrivadoDTO.setId(mensajePrivado.getId());
-        mensajePrivadoDTO.setContendoCifrado(mensajePrivado.getContendoCifrado());
+        mensajePrivadoDTO.setContendoCifrado(mensajePrivado.getContenidoCifrado());
         mensajePrivadoDTO.setFecha(mensajePrivado.getFecha());
         mensajePrivadoDTO.setUsuario(mensajePrivado.getUsuario());
         mensajePrivadoDTO.setSalaChatPrivado(mensajePrivado.getSalaChatPrivado());

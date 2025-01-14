@@ -1,10 +1,9 @@
 package org.main_java.chatprivado.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
+
 import java.util.List;
 
 @Entity
@@ -17,21 +16,24 @@ public class SalaChatPrivado {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "clave")
+    @Column(name = "clave", nullable = false)
     private String clave;
 
     @ManyToMany
-    @JoinColumn(name = "id_usuario")
-    @Size(max = 2, message = "Una sala de chat privado solo puede tener un máximo de 2 usuarios")
+    @JoinTable(
+            name = "usuario_sala",
+            joinColumns = @JoinColumn(name = "sala_id"),
+            inverseJoinColumns = @JoinColumn(name = "usuario_id")
+    )
     private List<Usuario> usuarios;
 
-    @OneToMany(mappedBy = "salaChatPrivado")
+    @OneToMany(mappedBy = "salaChatPrivado", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MensajePrivado> mensajesPrivados;
 
-    public SalaChatPrivado() {
-    }
+    public SalaChatPrivado() {}
 
-    public SalaChatPrivado(List<Usuario> usuarios, List<MensajePrivado> mensajesPrivados) {
+    public SalaChatPrivado(String clave, List<Usuario> usuarios, List<MensajePrivado> mensajesPrivados) {
+        this.clave = clave;
         this.usuarios = usuarios;
         this.mensajesPrivados = mensajesPrivados;
     }

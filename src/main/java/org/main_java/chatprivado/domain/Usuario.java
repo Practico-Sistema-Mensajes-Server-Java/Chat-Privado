@@ -3,6 +3,7 @@ package org.main_java.chatprivado.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.util.List;
 
 @Entity
@@ -15,22 +16,24 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nombre")
+    @Column(name = "nombre", nullable = false)
     private String nombre;
 
-    @Column(name = "rol")
+    @Column(name = "rol", nullable = false)
     private String rol;
 
-    @OneToMany
-    @JoinColumn(name = "mensajes")
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MensajePrivado> mensajes;
 
     @ManyToMany
-    @JoinColumn(name = "salas")
+    @JoinTable(
+            name = "usuario_sala",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "sala_id")
+    )
     private List<SalaChatPrivado> salas;
 
-    public Usuario() {
-    }
+    public Usuario() {}
 
     public Usuario(String nombre, String rol, List<MensajePrivado> mensajes, List<SalaChatPrivado> salas) {
         this.nombre = nombre;

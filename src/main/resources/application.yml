@@ -21,7 +21,7 @@ spring:
           new_generator_mappings: true
 
   application:
-    name: chat-privado
+    name: chat_privado
 
 server:
   port: 8096

@@ -1,5 +1,5 @@
 services:
-  mysql-chat-privado:
+  mysql-chat-priv:
     image: mysql:8.0
     hostname: mysql-chat-privado
     environment:
@@ -15,10 +15,10 @@ services:
       retries: 5
       timeout: 5s
 
-  chat-privado:
+  chat_privado:
     build:
       context: ./
-    container_name: chat-privado
+    container_name: chat_privado
     ports:
       - "8086:8096"
     networks:
@@ -30,7 +30,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=P@ssw0rd
     depends_on:
-      mysql-chat-privado:
+      mysql-chat-priv:
         condition: service_healthy
     entrypoint:
       [
@@ -39,10 +39,8 @@ services:
         "java", "-jar", "/app/chat-privado.jar"
       ]
 
-
 volumes:
   mysql-data:
-
 
 networks:
   backend-network:
